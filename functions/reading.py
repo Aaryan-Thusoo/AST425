@@ -8,8 +8,28 @@ def read_file(filename, num_rows=None):
     else:
         return pd.read_parquet(filename).head(num_rows)
 
+
+def slow_and_fast_setup():
+    galaxy_data = pd.read_csv("data/barred_galaxies.csv", delimiter=",")
+    kin_data = pd.read_csv("data/Table3.csv", delimiter=",")
+
+    # Split kin_data between fast and slow bars
+    slow_bars_kin_data = kin_data[kin_data["R"] > 1.4]
+    fast_bars_kin_data = kin_data[kin_data["R"] <= 1.4]
+
+    # ID for slow and fast bars
+    slow_bars_id = np.array(slow_bars_kin_data["dr8_id"])
+    fast_bars_id = np.array(fast_bars_kin_data["dr8_id"])
+
+    # All galaxy_data for slow and fast bars
+
+    slow_bars_galaxy_data, missing_slow = get_rows(galaxy_data, slow_bars_id)
+    fast_bars_galaxy_data, missing_fast = get_rows(galaxy_data, fast_bars_id)
+
+    return slow_bars_galaxy_data, fast_bars_galaxy_data
+
 def get_rows(data, rows):
-    # Get the matching rows
+    # Get the matching rows 
     matching_rows = data[data['dr8_id'].isin(rows)]
 
     # Find the rows that were not found
